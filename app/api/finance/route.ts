@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MOCK_CRYPTO, MOCK_PORTFOLIO_ITEMS } from '@/lib/mockData'
+import { MOCK_PORTFOLIO_ITEMS } from '@/lib/mockData'
 import type { CryptoQuote, StockQuote } from '@/types'
 
 // Fetch crypto prices from CoinGecko (free, no API key)
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       const cryptos = await fetchCryptoPrices(['bitcoin', 'ethereum', 'solana'])
       return NextResponse.json({ data: cryptos, source: 'coingecko' })
     } catch {
-      return NextResponse.json({ data: MOCK_CRYPTO, source: 'mock' })
+      return NextResponse.json({ data: [], source: 'empty' })
     }
   }
 

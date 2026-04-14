@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { WeatherData } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const apiKey = process.env.OPENWEATHER_API_KEY
   const city = process.env.NEXT_PUBLIC_WEATHER_CITY || 'Cairo'

@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Read(//c/Users/Mohamed Gomaa/Documents/Jarvis/**)",
+      "Bash(ls app/ components/ lib/)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
