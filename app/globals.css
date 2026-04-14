@@ -1,0 +1,579 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   JARVIS COMMAND CENTER — Global Styles
+   ============================================================ */
+
+:root {
+  --cyan: #00D4FF;
+  --cyan-dim: #00A8CC;
+  --cyan-glow: rgba(0, 212, 255, 0.15);
+  --amber: #FFB830;
+  --bg: #080A0F;
+  --surface: #0D1117;
+  --surface-2: #111827;
+  --text-primary: #E8F4F8;
+  --text-secondary: #7A9BAE;
+  --success: #00FF88;
+  --danger: #FF3B5C;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+  /* Subtle noise texture overlay */
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* HUD Grid Background */
+.hud-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.hud-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+}
+
+.hud-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 80% 80%, rgba(255, 184, 48, 0.03) 0%, transparent 60%);
+}
+
+/* Scan Line Effect */
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.8), transparent);
+  z-index: 9999;
+  pointer-events: none;
+  animation: scanLine 2s ease-in-out forwards;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+@keyframes scanLine {
+  0% { top: 0; opacity: 0.9; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+/* ============================================================
+   HUD PANEL — Core panel component styles
+   ============================================================ */
+.hud-panel {
+  position: relative;
+  background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(17, 24, 39, 0.9) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 2px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(0, 212, 255, 0.05);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+.hud-panel:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(0, 212, 255, 0.08),
+    inset 0 1px 0 rgba(0, 212, 255, 0.1);
+  transform: scale(1.002);
+}
+
+/* Corner brackets */
+.hud-panel::before,
+.hud-panel::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--cyan);
+  border-left: 2px solid var(--cyan);
+}
+
+.hud-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--cyan);
+  border-right: 2px solid var(--cyan);
+}
+
+/* Inner corner brackets via wrapper */
+.hud-panel-inner-corners::before,
+.hud-panel-inner-corners::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-panel-inner-corners::before {
+  top: -1px;
+  right: -1px;
+  border-top: 2px solid rgba(0, 212, 255, 0.5);
+  border-right: 2px solid rgba(0, 212, 255, 0.5);
+}
+
+.hud-panel-inner-corners::after {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: 2px solid rgba(0, 212, 255, 0.5);
+  border-left: 2px solid rgba(0, 212, 255, 0.5);
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(0, 212, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(0, 212, 255, 0.06),
+      inset 0 1px 0 rgba(0, 212, 255, 0.08);
+  }
+}
+
+/* ============================================================
+   PANEL HEADER
+   ============================================================ */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+}
+
+.panel-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* ============================================================
+   LIVE INDICATOR
+   ============================================================ */
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--success);
+}
+
+.live-dot::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 212, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.2);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.4);
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+.font-display {
+  font-family: 'Orbitron', monospace;
+}
+
+.font-hud {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.font-body {
+  font-family: 'Sora', sans-serif;
+}
+
+.text-cyan { color: var(--cyan); }
+.text-amber { color: var(--amber); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-secondary { color: var(--text-secondary); }
+
+/* ============================================================
+   GLOW TEXT EFFECTS
+   ============================================================ */
+.glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.glow-amber {
+  text-shadow: 0 0 10px rgba(255, 184, 48, 0.5), 0 0 20px rgba(255, 184, 48, 0.2);
+}
+
+.glow-success {
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.glow-danger {
+  text-shadow: 0 0 10px rgba(255, 59, 92, 0.5);
+}
+
+/* ============================================================
+   BUTTON VARIANTS
+   ============================================================ */
+.btn-hud {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  background: rgba(0, 212, 255, 0.05);
+  color: var(--cyan);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-hud:hover {
+  background: rgba(0, 212, 255, 0.12);
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.15);
+}
+
+.btn-hud:active {
+  transform: scale(0.97);
+}
+
+.btn-hud-amber {
+  border-color: rgba(255, 184, 48, 0.3);
+  background: rgba(255, 184, 48, 0.05);
+  color: var(--amber);
+}
+
+.btn-hud-amber:hover {
+  background: rgba(255, 184, 48, 0.12);
+  border-color: rgba(255, 184, 48, 0.6);
+  box-shadow: 0 0 15px rgba(255, 184, 48, 0.15);
+}
+
+.btn-hud-danger {
+  border-color: rgba(255, 59, 92, 0.3);
+  background: rgba(255, 59, 92, 0.05);
+  color: var(--danger);
+}
+
+.btn-hud-danger:hover {
+  background: rgba(255, 59, 92, 0.12);
+  border-color: rgba(255, 59, 92, 0.6);
+}
+
+/* ============================================================
+   INPUT FIELDS
+   ============================================================ */
+.hud-input {
+  background: rgba(0, 212, 255, 0.04);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 2px;
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.hud-input:focus {
+  border-color: rgba(0, 212, 255, 0.5);
+  background: rgba(0, 212, 255, 0.07);
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.1), inset 0 0 10px rgba(0, 212, 255, 0.03);
+}
+
+.hud-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+/* ============================================================
+   TAG BADGE
+   ============================================================ */
+.hud-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 2px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* ============================================================
+   PRIORITY BADGES
+   ============================================================ */
+.priority-critical {
+  background: rgba(255, 59, 92, 0.1);
+  border: 1px solid rgba(255, 59, 92, 0.3);
+  color: #FF3B5C;
+}
+
+.priority-high {
+  background: rgba(255, 184, 48, 0.1);
+  border: 1px solid rgba(255, 184, 48, 0.3);
+  color: #FFB830;
+}
+
+.priority-normal {
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  color: #00FF88;
+}
+
+/* ============================================================
+   SHIMMER / SKELETON
+   ============================================================ */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 212, 255, 0.03) 25%,
+    rgba(0, 212, 255, 0.08) 50%,
+    rgba(0, 212, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================================
+   INITIALIZING SCREEN
+   ============================================================ */
+.init-progress-bar {
+  position: relative;
+  height: 2px;
+  background: rgba(0, 212, 255, 0.1);
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+.init-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  animation: initProgress 2s ease-in-out forwards;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+@keyframes initProgress {
+  0% { width: 0; left: 0; }
+  50% { width: 60%; left: 20%; }
+  100% { width: 100%; left: 0; }
+}
+
+/* ============================================================
+   TIPTAP EDITOR OVERRIDES
+   ============================================================ */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 120px;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap-editor .ProseMirror h1,
+.tiptap-editor .ProseMirror h2,
+.tiptap-editor .ProseMirror h3 {
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--cyan);
+  margin: 8px 0 4px;
+}
+
+.tiptap-editor .ProseMirror ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.tiptap-editor .ProseMirror strong {
+  color: #E8F4F8;
+  font-weight: 600;
+}
+
+.tiptap-editor .ProseMirror em {
+  color: var(--amber);
+}
+
+/* ============================================================
+   RECHARTS OVERRIDES
+   ============================================================ */
+.recharts-cartesian-axis-tick-value {
+  fill: var(--text-secondary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 10px !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* ============================================================
+   TASK COMPLETION ANIMATION
+   ============================================================ */
+.task-completing {
+  animation: taskComplete 0.4s ease-out forwards;
+}
+
+@keyframes taskComplete {
+  0% { opacity: 1; transform: translateX(0); }
+  50% { opacity: 0.5; transform: translateX(4px); }
+  100% { opacity: 0.5; }
+}
+
+/* ============================================================
+   DRAG HANDLE
+   ============================================================ */
+.drag-handle {
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-item:hover .drag-handle {
+  opacity: 0.5;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Number value animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-count {
+  animation: countUp 0.6s ease-out forwards;
+}
+
+/* Stagger delays for panel entrance */
+.panel-entrance-1 { --delay: 0ms; }
+.panel-entrance-2 { --delay: 80ms; }
+.panel-entrance-3 { --delay: 160ms; }
+.panel-entrance-4 { --delay: 240ms; }
+.panel-entrance-5 { --delay: 320ms; }
+.panel-entrance-6 { --delay: 400ms; }
