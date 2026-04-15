@@ -32,30 +32,30 @@ export function HUDTopBar({ userEmail, userName, securityLabel, theme = 'light',
       className="workspace-card"
       style={{
         position: 'sticky',
-        top: 8,
+        top: 2,
         zIndex: 20,
-        margin: '8px 14px 0',
-        borderRadius: 22,
-        padding: '10px 18px',
+        margin: '2px 10px 0',
+        borderRadius: 16,
+        padding: '5px 14px',
         background: 'var(--topbar-bg)',
         backdropFilter: 'blur(18px)',
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}
     >
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="font-display" style={{ fontSize: 26, lineHeight: 1 }}>
+          <span className="font-display" style={{ fontSize: 22, lineHeight: 1 }}>
             Jarvis
           </span>
-          <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
             {userName || userEmail || 'Workspace'}
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {onToggleTheme ? (
             <button onClick={onToggleTheme} className="workspace-button" aria-label="Toggle theme">
-              {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+              {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
               {theme === 'dark' ? 'Light mode' : 'Dark mode'}
             </button>
           ) : null}
@@ -70,13 +70,13 @@ export function HUDTopBar({ userEmail, userName, securityLabel, theme = 'light',
 
           {securityLabel ? (
             <div className="workspace-badge workspace-badge--warm">
-              <ShieldCheck size={13} />
+              <ShieldCheck size={12} />
               {securityLabel}
             </div>
           ) : null}
 
           <button onClick={handleLogout} className="workspace-button">
-            <LogOut size={13} />
+            <LogOut size={12} />
             Logout
           </button>
         </div>

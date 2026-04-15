@@ -33,69 +33,68 @@ export function NewsPanel() {
   return (
     <PanelWrapper
       title="News"
-      icon={<Newspaper size={16} />}
+      icon={<Newspaper size={14} />}
       className="h-full"
       headerRight={
-        <button onClick={() => refetch()} className="workspace-button" style={{ padding: '8px 12px' }}>
-          <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
+        <button onClick={() => refetch()} className="workspace-button" style={{ padding: '5px 10px' }}>
+          <RefreshCw size={12} className={isFetching ? 'animate-spin' : ''} />
           Refresh
         </button>
       }
     >
-      <div className="flex h-full min-h-0 flex-col gap-4">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((item) => {
-            const selected = category === item.value
+      {/* filter tabs — always visible, never in scroll area */}
+      <div className="flex flex-shrink-0 flex-wrap gap-1.5 pb-2">
+        {categories.map((item) => {
+          const selected = category === item.value
+          return (
+            <button
+              key={item.value}
+              onClick={() => setCategory(item.value)}
+              className={selected ? 'workspace-button workspace-button--soft' : 'workspace-button'}
+              style={{ padding: '5px 10px' }}
+            >
+              {item.label}
+            </button>
+          )
+        })}
+      </div>
 
-            return (
-              <button
-                key={item.value}
-                onClick={() => setCategory(item.value)}
-                className={selected ? 'workspace-button workspace-button--soft' : 'workspace-button'}
-                style={{ padding: '8px 12px' }}
+      {/* scrollable list fills remaining height */}
+      <div className="workspace-scroll min-h-0 flex-1 overflow-y-auto pr-1">
+        {isLoading ? (
+          <div className="workspace-empty h-full">
+            <span>Loading the latest news...</span>
+          </div>
+        ) : articles.length === 0 ? (
+          <div className="workspace-empty h-full">
+            <Newspaper size={18} />
+            <span>No articles found.</span>
+          </div>
+        ) : (
+          <div className="workspace-list">
+            {articles.slice(0, 20).map((article) => (
+              <a
+                key={article.id}
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="workspace-card block px-3 py-2.5 transition-transform hover:-translate-y-0.5"
               >
-                {item.label}
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="workspace-scroll min-h-0 flex-1 overflow-y-auto pr-1">
-          {isLoading ? (
-            <div className="workspace-empty">
-              <span>Loading the latest news...</span>
-            </div>
-          ) : articles.length === 0 ? (
-            <div className="workspace-empty">
-              <Newspaper size={20} />
-              <span>No articles found.</span>
-            </div>
-          ) : (
-            <div className="workspace-list">
-              {articles.slice(0, 20).map((article) => (
-                <a
-                  key={article.id}
-                  href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="workspace-card block p-5 transition-transform hover:-translate-y-0.5"
-                >
-                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-soft)' }}>
-                    {article.source}
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-soft)' }}>
+                  {article.source}
+                </div>
+                <div className="truncate-2" style={{ marginTop: 3, fontSize: 14, fontWeight: 800, lineHeight: 1.4 }}>
+                  {article.title}
+                </div>
+                {article.description ? (
+                  <div className="truncate-2" style={{ marginTop: 3, fontSize: 12, color: 'var(--text-soft)', lineHeight: 1.4 }}>
+                    {article.description}
                   </div>
-                  <div style={{ marginTop: 8, fontSize: 16, fontWeight: 800, lineHeight: 1.35 }}>
-                    {article.title}
-                  </div>
-                  {article.description ? (
-                    <div className="truncate-2" style={{ marginTop: 8, fontSize: 13, color: 'var(--text-soft)' }}>
-                      {article.description}
-                    </div>
-                  ) : null}
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
+                ) : null}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </PanelWrapper>
   )
