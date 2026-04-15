@@ -359,8 +359,8 @@ export default function DashboardPage() {
 
         {/* Rows 1+2: the existing 6-panel grid — fills remaining viewport */}
         <div
-          className="grid min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(0,44fr)_minmax(0,56fr)] 2xl:gap-4"
-          style={{ flex: '1 0 0', minHeight: 560 }}
+          className="grid min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(260px,44fr)_minmax(330px,56fr)] 2xl:gap-4"
+          style={{ flex: '1 0 0', minHeight: 602 }}
         >
           <div className="min-h-0 xl:col-span-5">
             <NewsPanel />
