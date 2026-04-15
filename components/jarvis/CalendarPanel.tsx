@@ -27,6 +27,7 @@ function sortEvents(events: PlannerEvent[]) {
 
 export function CalendarPanel() {
   const [events, setEvents] = useState<PlannerEvent[]>([])
+  const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('')
@@ -82,48 +83,59 @@ export function CalendarPanel() {
     setStartTime('')
     setEndTime('')
     setNotes('')
+    setShowForm(false)
   }
 
   const headerRight = (
-    <div className="workspace-badge workspace-badge--info">
-      {events.length} event{events.length === 1 ? '' : 's'}
+    <div className="flex items-center gap-2">
+      <div className="workspace-badge workspace-badge--info">
+        {events.length} event{events.length === 1 ? '' : 's'}
+      </div>
+      <button
+        onClick={() => setShowForm((v) => !v)}
+        className="workspace-button workspace-button--primary"
+        style={{ padding: '6px 12px' }}
+      >
+        <Plus size={13} />
+        {showForm ? 'Cancel' : 'Add'}
+      </button>
     </div>
   )
 
   return (
     <PanelWrapper title="Timeline" icon={<CalendarDays size={16} />} headerRight={headerRight} className="h-full">
-      <div className="flex h-full min-h-0 flex-col gap-4">
-        <div className="grid gap-2 md:grid-cols-2">
-          <input
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            className="workspace-input"
-            placeholder="Event title"
-          />
-          <input value={date} onChange={(event) => setDate(event.target.value)} type="date" className="workspace-input" />
-          <input
-            value={startTime}
-            onChange={(event) => setStartTime(event.target.value)}
-            type="time"
-            className="workspace-input"
-          />
-          <input value={endTime} onChange={(event) => setEndTime(event.target.value)} type="time" className="workspace-input" />
-        </div>
-
-        <textarea
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-          className="workspace-input"
-          style={{ minHeight: 56, resize: 'vertical' }}
-          placeholder="Optional notes"
-        />
-
-        <div>
-          <button onClick={addEvent} className="workspace-button workspace-button--primary">
-            <Plus size={14} />
-            Add event
-          </button>
-        </div>
+      <div className="flex h-full min-h-0 flex-col gap-3">
+        {showForm ? (
+          <div className="flex flex-col gap-2">
+            <div className="grid gap-2 md:grid-cols-2">
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className="workspace-input"
+                placeholder="Event title"
+              />
+              <input value={date} onChange={(event) => setDate(event.target.value)} type="date" className="workspace-input" />
+              <input
+                value={startTime}
+                onChange={(event) => setStartTime(event.target.value)}
+                type="time"
+                className="workspace-input"
+              />
+              <input value={endTime} onChange={(event) => setEndTime(event.target.value)} type="time" className="workspace-input" />
+            </div>
+            <textarea
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
+              className="workspace-input"
+              style={{ minHeight: 52, resize: 'none' }}
+              placeholder="Optional notes"
+            />
+            <button onClick={addEvent} className="workspace-button workspace-button--primary" style={{ alignSelf: 'flex-start' }}>
+              <Plus size={14} />
+              Save event
+            </button>
+          </div>
+        ) : null}
 
         <div className="workspace-scroll min-h-0 flex-1 overflow-y-auto pr-1">
           {groupedEvents.length === 0 ? (
