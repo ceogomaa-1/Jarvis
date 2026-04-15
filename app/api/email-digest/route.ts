@@ -82,6 +82,40 @@ async function fetchInbox(accessToken: string) {
   })
 }
 
+async function describeGoogleError(response: Response) {
+  const fallback = `gmail_request_failed:${response.status}`
+
+  try {
+    const payload = (await response.json()) as {
+      error?: {
+        message?: string
+        status?: string
+        details?: Array<{ reason?: string }>
+      }
+    }
+
+    const message = payload.error?.message ?? ''
+    const reason = payload.error?.details?.[0]?.reason ?? ''
+    const combined = `${reason} ${message}`.toLowerCase()
+
+    if (combined.includes('accessnotconfigured') || combined.includes('gmail api has not been used')) {
+      return 'gmail_api_not_enabled'
+    }
+
+    if (combined.includes('insufficient authentication scopes') || combined.includes('insufficientpermissions')) {
+      return 'gmail_scope_missing'
+    }
+
+    if (combined.includes('precondition check failed')) {
+      return 'gmail_precondition_failed'
+    }
+
+    return message ? `${fallback}:${message}` : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export async function GET() {
   const cookieStore = cookies()
   let refreshToken = cookieStore.get('jarvis_google_provider_refresh_token')?.value ?? ''
@@ -122,7 +156,7 @@ export async function GET() {
   }
 
   if (!inboxRes.ok) {
-    const reason = inboxRes.status === 401 ? 'google_session_expired' : 'gmail_request_failed'
+    const reason = inboxRes.status === 401 ? 'google_session_expired' : await describeGoogleError(inboxRes.clone())
 
     return NextResponse.json(
       {

@@ -41,6 +41,9 @@ export function EmailPanel() {
   const emails = data?.emails ?? []
   const tokenExpired = error instanceof Error && error.message === 'google_session_expired'
   const missingGoogleToken = error instanceof Error && error.message === 'missing_provider_token'
+  const gmailApiNotEnabled = error instanceof Error && error.message === 'gmail_api_not_enabled'
+  const gmailScopeMissing = error instanceof Error && error.message === 'gmail_scope_missing'
+  const gmailPreconditionFailed = error instanceof Error && error.message === 'gmail_precondition_failed'
 
   return (
     <PanelWrapper
@@ -74,6 +77,30 @@ export function EmailPanel() {
             <span>Your Google inbox session expired.</span>
             <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
               Sign out and sign back in with Google to refresh Gmail access.
+            </span>
+          </div>
+        ) : gmailApiNotEnabled ? (
+          <div className="workspace-empty h-full">
+            <Mail size={22} />
+            <span>Google is rejecting Gmail access because the Gmail API is not enabled.</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              Enable the Gmail API in the same Google Cloud project that owns your OAuth client, then sign in again.
+            </span>
+          </div>
+        ) : gmailScopeMissing ? (
+          <div className="workspace-empty h-full">
+            <Mail size={22} />
+            <span>Google signed you in, but the Gmail permission was not granted to this session.</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              Sign out and sign back in, approve Gmail access on the consent screen, and Jarvis will retry automatically.
+            </span>
+          </div>
+        ) : gmailPreconditionFailed ? (
+          <div className="workspace-empty h-full">
+            <Mail size={22} />
+            <span>Google blocked the Gmail request with a precondition failure.</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              This usually means the Google project or consent configuration still needs one more fix.
             </span>
           </div>
         ) : error ? (
