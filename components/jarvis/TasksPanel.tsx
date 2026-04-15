@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, Circle, ListTodo, Plus, Trash2 } from 'lucide-react'
+import { CheckCircle2, Circle, ListTodo, Plus, Trash2, Zap } from 'lucide-react'
 import { PanelWrapper } from '@/components/jarvis/PanelWrapper'
 import type { Priority, Task } from '@/types'
 
@@ -20,6 +20,108 @@ async function fetchTasks(): Promise<Task[]> {
   if (!res.ok) throw new Error('Failed to load tasks')
   const data = (await res.json()) as TaskResponse
   return data.tasks ?? []
+}
+
+function PrioritySpotlight({
+  tasks,
+  onToggle,
+}: {
+  tasks: Task[]
+  onToggle: (task: Task) => void
+}) {
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [draftTitle, setDraftTitle] = useState('')
+  const queryClient = useQueryClient()
+
+  const priorityOrder: Priority[] = ['critical', 'high', 'normal']
+  let spotlight: Task | null = null
+  for (const p of priorityOrder) {
+    const found = tasks.find((t) => !t.completed && t.priority === p)
+    if (found) { spotlight = found; break }
+  }
+
+  const updateTitle = useMutation({
+    mutationFn: async (title: string) => {
+      if (!spotlight) return
+      const res = await fetch('/api/tasks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: spotlight.id, title }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    },
+    onSuccess: () => {
+      setEditingTitle(false)
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+
+  if (!spotlight) {
+    return (
+      <div className="priority-spotlight flex-shrink-0" style={{ marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 4 }}>
+          ⚡ PRIORITY #1
+        </div>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>No priority set — add a task to begin.</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="priority-spotlight flex flex-shrink-0 items-center gap-3" style={{ marginBottom: 8 }}>
+      {/* Checkbox */}
+      <button
+        onClick={() => onToggle(spotlight!)}
+        className="flex-shrink-0"
+        aria-label="Complete priority task"
+        style={{ width: 22, height: 22 }}
+      >
+        {spotlight.completed
+          ? <CheckCircle2 size={22} color="var(--success)" />
+          : <Circle size={22} color="var(--danger)" />}
+      </button>
+
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--danger)', marginBottom: 2 }}>
+          <Zap size={9} style={{ display: 'inline', marginRight: 3 }} />
+          PRIORITY #1
+        </div>
+        {editingTitle ? (
+          <input
+            autoFocus
+            value={draftTitle}
+            onChange={(e) => setDraftTitle(e.target.value)}
+            onBlur={() => { if (draftTitle.trim()) updateTitle.mutate(draftTitle.trim()); else setEditingTitle(false) }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && draftTitle.trim()) updateTitle.mutate(draftTitle.trim())
+              if (e.key === 'Escape') setEditingTitle(false)
+            }}
+            className="workspace-input"
+            style={{ fontSize: 15, fontWeight: 700, padding: '3px 8px' }}
+          />
+        ) : (
+          <div
+            onClick={() => { setDraftTitle(spotlight!.title); setEditingTitle(true) }}
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: 'text',
+              textDecoration: spotlight.completed ? 'line-through' : 'none',
+              color: spotlight.completed ? 'var(--text-muted)' : 'var(--text)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title="Click to edit"
+          >
+            {spotlight.title}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 export function TasksPanel() {
@@ -73,6 +175,11 @@ export function TasksPanel() {
       headerRight={<div className="workspace-badge workspace-badge--info">{completed}/{tasks.length || 0} done</div>}
       className="h-full"
     >
+      {/* Priority Spotlight — always pinned above add row */}
+      {!isLoading ? (
+        <PrioritySpotlight tasks={tasks} onToggle={(task) => toggleTask.mutate(task)} />
+      ) : null}
+
       {/* add row — always pinned */}
       <div className="flex flex-shrink-0 gap-2 pb-2">
         <input
@@ -115,7 +222,6 @@ export function TasksPanel() {
             {tasks.map((task) => {
               const badge = priorityStyles[task.priority]
               return (
-                /* single-row task: ~42px tall */
                 <div
                   key={task.id}
                   className="workspace-card flex items-center gap-2 px-3 py-2"

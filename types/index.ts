@@ -159,3 +159,54 @@ export interface DashboardState {
   } | null
   isInitializing: boolean
 }
+
+// --- Day Score ---
+export interface DayScore {
+  id: string
+  user_id: string
+  score: number
+  note: string | null
+  date: string
+  created_at: string
+}
+
+// --- Finance Profile ---
+export interface FinanceExpense {
+  id: string
+  name: string
+  amount: number
+  category: 'Housing' | 'Food' | 'Transport' | 'Subscriptions' | 'Debt' | 'Other'
+}
+
+export interface FinanceProfile {
+  id: string
+  user_id: string
+  income: number
+  income_frequency: 'weekly' | 'biweekly' | 'monthly'
+  expenses: FinanceExpense[]
+}
+
+// --- Finance Goals ---
+export interface FinanceGoal {
+  id: string
+  user_id: string
+  name: string
+  target_amount: number
+  current_saved: number
+  deadline: string | null
+  created_at: string
+}
+
+// --- Finance Chat ---
+export interface FinanceChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+// --- Email Smart Filter ---
+export interface EmailFilterConfig {
+  id: string
+  user_id: string
+  keywords: string[]
+  filter_enabled: boolean
+}

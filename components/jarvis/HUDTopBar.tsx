@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { LogOut, Moon, ShieldCheck, Sun } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { FocusTimer } from '@/components/jarvis/FocusTimer'
+import { DayScore } from '@/components/jarvis/DayScore'
 
 interface HUDTopBarProps {
   userEmail?: string
@@ -67,6 +69,12 @@ export function HUDTopBar({ userEmail, userName, securityLabel, theme = 'light',
           <div className="workspace-badge workspace-badge--info">
             {time.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
           </div>
+
+          {/* Focus Timer — between clock and MFA badge */}
+          <FocusTimer />
+
+          {/* Day Score */}
+          <DayScore />
 
           {securityLabel ? (
             <div className="workspace-badge workspace-badge--warm">

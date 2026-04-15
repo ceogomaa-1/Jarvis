@@ -456,3 +456,217 @@ button {
 .tiptap-editor .ProseMirror {
   outline: none;
 }
+
+/* ─── Pulse animations ─── */
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(74, 222, 128, 0); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(248, 113, 113, 0); }
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes strike-through {
+  from { text-decoration-color: transparent; }
+  to { text-decoration-color: currentColor; }
+}
+
+.pulse-green {
+  animation: pulse-green 1.5s ease-in-out infinite;
+}
+
+.pulse-red {
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+.dot-blink {
+  animation: dot-blink 1s ease-in-out infinite;
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.25s ease-out both;
+}
+
+/* ─── Priority spotlight ─── */
+
+.priority-spotlight {
+  background: rgba(248, 113, 113, 0.06);
+  border: 1px solid rgba(248, 113, 113, 0.18);
+  border-left: 3px solid var(--danger);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+
+/* ─── Briefing panel ─── */
+
+.briefing-panel {
+  background: linear-gradient(135deg, var(--panel) 0%, color-mix(in srgb, var(--panel) 94%, var(--accent)) 100%);
+  border-left: 3px solid var(--accent);
+}
+
+/* ─── FAB (Quick Capture) ─── */
+
+.fab-button {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 9999;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fab-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* ─── Modal overlay ─── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-card {
+  background: var(--panel-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--panel-shadow);
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  animation: fade-in-up 0.2s ease-out;
+}
+
+/* ─── Toast ─── */
+
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background: var(--panel-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--panel-shadow);
+  animation: fade-in-up 0.2s ease-out;
+  white-space: nowrap;
+}
+
+/* ─── Popover ─── */
+
+.popover {
+  position: absolute;
+  z-index: 200;
+  background: var(--panel-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: var(--panel-shadow);
+  padding: 16px;
+  animation: fade-in-up 0.18s ease-out;
+}
+
+/* ─── Finance progress bar ─── */
+
+.finance-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--panel-muted);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+
+.finance-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--success)));
+  transition: width 0.4s ease;
+}
+
+/* ─── Chat bubbles ─── */
+
+.chat-bubble-user {
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 16px 16px 4px 16px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.chat-bubble-ai {
+  background: var(--panel-muted);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px 16px 16px 4px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  align-self: flex-start;
+  max-width: 95%;
+}
+
+/* ─── Segment tabs ─── */
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--panel-muted);
+  border: 1px solid var(--panel-border);
+}
+
+.tab-bar__tab {
+  flex: 1;
+  padding: 6px 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-soft);
+  transition: background 0.2s ease, color 0.2s ease;
+  text-align: center;
+  cursor: pointer;
+}
+
+.tab-bar__tab[data-active='true'] {
+  background: var(--button-bg);
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+

@@ -11,6 +11,9 @@ import { TasksPanel } from '@/components/jarvis/TasksPanel'
 import { NotesPanel } from '@/components/jarvis/NotesPanel'
 import { CalendarPanel } from '@/components/jarvis/CalendarPanel'
 import { EmailPanel } from '@/components/jarvis/EmailPanel'
+import { BriefingPanel } from '@/components/jarvis/BriefingPanel'
+import { QuickCapture } from '@/components/jarvis/QuickCapture'
+import { FinanceAgentPanel } from '@/components/jarvis/FinanceAgentPanel'
 
 interface UserInfo {
   id: string
@@ -346,8 +349,19 @@ export default function DashboardPage() {
         onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
       />
 
-      <main className="px-2 pt-1 md:px-3 lg:h-[calc(100vh-34px)] lg:overflow-hidden xl:px-4" style={{ paddingBottom: 28 }}>
-        <div className="grid h-full min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(0,44fr)_minmax(0,56fr)] 2xl:gap-4">
+      {/* Main scrolls vertically; the 2-row panel grid is fixed-height within it */}
+      <main
+        className="workspace-scroll px-2 pt-2 md:px-3 xl:px-4"
+        style={{ height: 'calc(100vh - 44px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 32 }}
+      >
+        {/* Row 0: Full-width AI Briefing — fixed ~110px */}
+        <BriefingPanel />
+
+        {/* Rows 1+2: the existing 6-panel grid — fills remaining viewport */}
+        <div
+          className="grid min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(0,44fr)_minmax(0,56fr)] 2xl:gap-4"
+          style={{ flex: '1 0 0', minHeight: 560 }}
+        >
           <div className="min-h-0 xl:col-span-5">
             <NewsPanel />
           </div>
@@ -368,7 +382,15 @@ export default function DashboardPage() {
             <CalendarPanel />
           </div>
         </div>
+
+        {/* Row 3: Full-width Finance Agent Panel */}
+        <div style={{ minHeight: 460, maxHeight: 520, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          <FinanceAgentPanel />
+        </div>
       </main>
+
+      {/* Global Quick Capture FAB */}
+      <QuickCapture />
     </div>
   )
 }
