@@ -346,8 +346,8 @@ export default function DashboardPage() {
         onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
       />
 
-      <main className="px-5 pb-5 pt-3 md:px-6 lg:h-[calc(100vh-118px)] lg:overflow-hidden">
-        <div className="grid h-full min-h-0 grid-cols-1 gap-5 xl:grid-cols-12 xl:grid-rows-[minmax(0,1fr)_minmax(0,1fr)]">
+      <main className="px-4 pb-4 pt-2 md:px-5 lg:h-[calc(100vh-74px)] lg:overflow-hidden">
+        <div className="grid h-full min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="min-h-0 xl:col-span-5">
             <NewsPanel />
           </div>

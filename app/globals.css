@@ -180,7 +180,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 22px 14px;
+  padding: 12px 18px 10px;
   border-bottom: 1px solid var(--panel-border);
 }
 
@@ -204,7 +204,7 @@ button {
 .workspace-panel__body {
   flex: 1;
   min-height: 0;
-  padding: 18px 22px 22px;
+  padding: 14px 18px 18px;
 }
 
 .workspace-panel__body--flush {
