@@ -45,47 +45,58 @@ export function HUDTopBar({ userEmail, userName, securityLabel, theme = 'light',
       }}
     >
       <div className="flex items-center justify-between gap-2">
+        {/* Left: logo + name */}
         <div className="flex items-center gap-3 min-w-0">
           <span className="font-display" style={{ fontSize: 22, lineHeight: 1 }}>
             Jarvis
           </span>
-          <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
+          <span className="hidden sm:block" style={{ color: 'var(--text-muted)', fontSize: 11 }}>
             {userName || userEmail || 'Workspace'}
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* Right: controls — on mobile show only time + logout */}
+        <div className="flex items-center gap-1.5">
+          {/* Theme toggle — icon only on mobile */}
           {onToggleTheme ? (
             <button onClick={onToggleTheme} className="workspace-button" aria-label="Toggle theme">
               {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
             </button>
           ) : null}
 
+          {/* Time — always visible */}
           <div className="workspace-badge workspace-badge--success">
             <span>{time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
           </div>
 
-          <div className="workspace-badge workspace-badge--info">
+          {/* Date — hidden on mobile */}
+          <div className="workspace-badge workspace-badge--info hidden sm:inline-flex">
             {time.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
           </div>
 
-          {/* Focus Timer — between clock and MFA badge */}
-          <FocusTimer />
+          {/* Focus Timer — hidden on mobile */}
+          <div className="hidden md:block">
+            <FocusTimer />
+          </div>
 
-          {/* Day Score */}
-          <DayScore />
+          {/* Day Score — hidden on mobile */}
+          <div className="hidden md:block">
+            <DayScore />
+          </div>
 
+          {/* Security label — hidden on mobile */}
           {securityLabel ? (
-            <div className="workspace-badge workspace-badge--warm">
+            <div className="workspace-badge workspace-badge--warm hidden sm:inline-flex">
               <ShieldCheck size={12} />
               {securityLabel}
             </div>
           ) : null}
 
-          <button onClick={handleLogout} className="workspace-button">
+          {/* Logout — always visible */}
+          <button onClick={handleLogout} className="workspace-button" aria-label="Logout">
             <LogOut size={12} />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </div>

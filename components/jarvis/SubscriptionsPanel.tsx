@@ -114,7 +114,7 @@ export function SubscriptionsPanel() {
         ) : null
       }
     >
-      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+      <div className="subs-body">
         {/* ── Subscription list ─────────────────────────────────────────────── */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {isLoading ? (
@@ -218,7 +218,7 @@ export function SubscriptionsPanel() {
 
         {/* ── Add form ──────────────────────────────────────────────────────── */}
         <div
-          className="workspace-card"
+          className="workspace-card subs-add-form"
           style={{ width: 260, flexShrink: 0, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}
         >
           <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>

@@ -670,3 +670,94 @@ button {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
+/* ─── MY GOAL panel layout ─── */
+
+.my-goal-body {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  min-height: 86px;
+}
+
+/* ─── Subscriptions panel layout ─── */
+
+.subs-body {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* ─── Briefing panel layout ─── */
+
+.briefing-panel--root {
+  min-height: 110px;
+  max-height: 130px;
+  flex-shrink: 0;
+}
+
+.briefing-panel__body {
+  padding: 12px 16px !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+}
+
+.briefing-panel__label {
+  padding-top: 2px;
+}
+
+/* ─── Mobile overrides (≤ 640px) ─── */
+
+@media (max-width: 640px) {
+  /* Panel body: tighter padding on phone */
+  .workspace-panel__body {
+    padding: 10px 12px 12px !important;
+  }
+
+  .workspace-panel__header {
+    padding: 7px 12px;
+  }
+
+  /* MY GOAL: stack sections vertically */
+  .my-goal-body {
+    flex-direction: column;
+    min-height: unset;
+  }
+
+  .my-goal-left,
+  .my-goal-right {
+    width: 100% !important;
+  }
+
+  .my-goal-center {
+    flex: unset !important;
+    width: 100% !important;
+  }
+
+  /* Subscriptions: stack add form below list */
+  .subs-body {
+    flex-direction: column;
+  }
+
+  .subs-add-form {
+    width: 100% !important;
+  }
+
+  /* Briefing: taller on mobile so text isn't clipped */
+  .briefing-panel--root {
+    max-height: 200px !important;
+  }
+
+  .briefing-panel__body {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .briefing-panel__label {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 10px;
+    padding-top: 0;
+  }
+}
+

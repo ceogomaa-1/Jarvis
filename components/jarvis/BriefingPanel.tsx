@@ -164,12 +164,11 @@ export function BriefingPanel() {
 
   return (
     <div
-      className="workspace-panel briefing-panel flex-shrink-0"
-      style={{ minHeight: 110, maxHeight: 130 }}
+      className="workspace-panel briefing-panel flex-shrink-0 briefing-panel--root"
     >
-      <div className="workspace-panel__body" style={{ padding: '12px 16px', flexDirection: 'row', alignItems: 'flex-start', gap: 16 }}>
+      <div className="workspace-panel__body briefing-panel__body">
         {/* Left label */}
-        <div className="flex flex-shrink-0 flex-col gap-1" style={{ paddingTop: 2 }}>
+        <div className="flex flex-shrink-0 flex-col gap-1 briefing-panel__label">
           <div className="flex items-center gap-2">
             <span
               style={{ width: 7, height: 7, borderRadius: '999px', background: 'var(--success)', display: 'inline-block', flexShrink: 0 }}

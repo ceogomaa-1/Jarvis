@@ -162,17 +162,10 @@ export function MyGoalPanel() {
       icon={<Target size={14} />}
       className="flex-shrink-0"
     >
-      <div
-        style={{
-          display: 'flex',
-          gap: 16,
-          alignItems: 'stretch',
-          minHeight: 86,
-        }}
-      >
+      <div className="my-goal-body">
         {/* ── LEFT: Goal Info (~30%) ────────────────────────────────────────── */}
         <div
-          className="workspace-card"
+          className="workspace-card my-goal-left"
           style={{
             width: '30%',
             flexShrink: 0,
@@ -255,7 +248,7 @@ export function MyGoalPanel() {
 
         {/* ── CENTER: Progress Bar (~45%) ───────────────────────────────────── */}
         <div
-          className="workspace-card"
+          className="workspace-card my-goal-center"
           style={{
             flex: 1,
             padding: '10px 14px',
@@ -320,7 +313,7 @@ export function MyGoalPanel() {
 
         {/* ── RIGHT: Add Savings (~25%) ─────────────────────────────────────── */}
         <div
-          className="workspace-card"
+          className="workspace-card my-goal-right"
           style={{
             width: '22%',
             flexShrink: 0,
