@@ -423,9 +423,10 @@ function AIAdvisorTab() {
   const { data: profile } = useQuery({ queryKey: ['finance-profile'], queryFn: fetchProfile, staleTime: 30_000 })
   const { data: goals = [] } = useQuery({ queryKey: ['finance-goals'], queryFn: fetchGoals, staleTime: 30_000 })
 
-  const surplusAmt = surplus(profile)
-  const monthlyInc = monthlyIncome(profile)
-  const totalExp = totalExpenses(profile)
+  const profileData = profile ?? null
+  const surplusAmt = surplus(profileData)
+  const monthlyInc = monthlyIncome(profileData)
+  const totalExp = totalExpenses(profileData)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })

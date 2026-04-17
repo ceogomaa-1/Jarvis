@@ -14,6 +14,8 @@ import { EmailPanel } from '@/components/jarvis/EmailPanel'
 import { BriefingPanel } from '@/components/jarvis/BriefingPanel'
 import { QuickCapture } from '@/components/jarvis/QuickCapture'
 import { FinanceAgentPanel } from '@/components/jarvis/FinanceAgentPanel'
+import { MyGoalPanel } from '@/components/jarvis/MyGoalPanel'
+import { SubscriptionsPanel } from '@/components/jarvis/SubscriptionsPanel'
 
 interface UserInfo {
   id: string
@@ -359,8 +361,8 @@ export default function DashboardPage() {
 
         {/* Rows 1+2: the existing 6-panel grid — fills remaining viewport */}
         <div
-          className="grid min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(260px,44fr)_minmax(330px,56fr)] 2xl:gap-4"
-          style={{ flex: '1 0 0', minHeight: 602 }}
+          className="grid min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(310px,44fr)_minmax(400px,56fr)] 2xl:gap-4"
+          style={{ flex: '1 0 0', minHeight: 740 }}
         >
           <div className="min-h-0 xl:col-span-5">
             <NewsPanel />
@@ -372,10 +374,10 @@ export default function DashboardPage() {
             <EmailPanel />
           </div>
 
-          <div className="min-h-0 xl:col-span-3">
+          <div className="min-h-0 xl:col-span-4">
             <TasksPanel />
           </div>
-          <div className="min-h-0 xl:col-span-5">
+          <div className="min-h-0 xl:col-span-4">
             <NotesPanel />
           </div>
           <div className="min-h-0 xl:col-span-4">
@@ -383,7 +385,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Row 3: Full-width Finance Agent Panel */}
+        {/* Row 3: Full-width My Goal Panel */}
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          <MyGoalPanel />
+        </div>
+
+        {/* Row 4: Full-width Subscriptions Panel */}
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          <SubscriptionsPanel />
+        </div>
+
+        {/* Row 5: Full-width Finance Agent Panel */}
         <div style={{ minHeight: 460, maxHeight: 520, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
           <FinanceAgentPanel />
         </div>

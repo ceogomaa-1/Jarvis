@@ -238,8 +238,14 @@ export function TasksPanel() {
                   </button>
 
                   <span
-                    className="min-w-0 flex-1 truncate-1"
-                    style={{ fontSize: 13, fontWeight: 700, textDecoration: task.completed ? 'line-through' : 'none' }}
+                    className="min-w-0 flex-1"
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      textDecoration: task.completed ? 'line-through' : 'none',
+                      wordBreak: 'break-word',
+                      lineHeight: 1.35,
+                    }}
                   >
                     {task.title}
                   </span>
