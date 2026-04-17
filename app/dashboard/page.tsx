@@ -16,6 +16,7 @@ import { QuickCapture } from '@/components/jarvis/QuickCapture'
 import { FinanceAgentPanel } from '@/components/jarvis/FinanceAgentPanel'
 import { MyGoalPanel } from '@/components/jarvis/MyGoalPanel'
 import { SubscriptionsPanel } from '@/components/jarvis/SubscriptionsPanel'
+import { GoogleCalendarPanel } from '@/components/jarvis/GoogleCalendarPanel'
 
 interface UserInfo {
   id: string
@@ -398,6 +399,11 @@ export default function DashboardPage() {
         {/* Row 5: Full-width Finance Agent Panel */}
         <div style={{ minHeight: 460, maxHeight: 520, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
           <FinanceAgentPanel />
+        </div>
+
+        {/* Row 6: Full-width Google Calendar Panel */}
+        <div style={{ minHeight: 420, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          <GoogleCalendarPanel />
         </div>
       </main>
 

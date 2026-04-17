@@ -670,6 +670,141 @@ button {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
+/* ─── Google Calendar panel ─── */
+
+.gcal-body {
+  display: flex;
+  gap: 16px;
+  min-height: 340px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gcal-grid-col {
+  width: 52%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.gcal-events-col {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.gcal-week-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 2px;
+}
+
+.gcal-day-header {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 0;
+}
+
+.gcal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  flex: 1;
+}
+
+.gcal-day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: 1px solid transparent;
+  background: none;
+  min-height: 40px;
+}
+
+.gcal-day-cell:hover {
+  background: var(--panel-muted);
+  border-color: var(--panel-border);
+}
+
+.gcal-day-cell[data-selected='true'] {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.gcal-day-cell[data-today='true'] .gcal-day-number {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.gcal-day-number {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+
+.gcal-day-cell[data-current='false'] .gcal-day-number {
+  color: var(--text-muted);
+}
+
+.gcal-event-dots {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+
+.gcal-event-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.gcal-event-dot-more {
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .gcal-body {
+    flex-direction: column;
+    min-height: unset;
+  }
+
+  .gcal-grid-col {
+    width: 100%;
+  }
+
+  .gcal-day-cell {
+    min-height: 34px;
+    padding: 3px 1px;
+  }
+
+  .gcal-day-number {
+    font-size: 11px;
+  }
+}
+
 /* ─── MY GOAL panel layout ─── */
 
 .my-goal-body {
