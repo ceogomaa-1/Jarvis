@@ -5,7 +5,13 @@
       "Bash(npm run:*)",
       "Read(//c/Users/Mohamed Gomaa/Documents/Jarvis/**)",
       "Bash(ls app/ components/ lib/)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(cd /tmp)",
+      "Bash(cp \"C:/Users/Mohamed Gomaa/.claude/projects/c--Users-Mohamed-Gomaa-Documents-Jarvis--claude-worktrees-sweet-gould/16fd6a9b-e260-4767-9f5c-1535f462dade/tool-results/webfetch-1776488913731-8twhbn.bin\" design.tar.gz)",
+      "Bash(tar -tzf design.tar.gz)",
+      "Bash(tar -xzf design.tar.gz)",
+      "Bash(npx next *)"
     ]
   }
 }

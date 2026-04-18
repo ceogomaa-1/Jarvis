@@ -1,12 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RefreshCw, Zap } from 'lucide-react'
 import { format } from 'date-fns'
 import type { PlannerEvent } from '@/types'
 
 const STORAGE_KEY_BRIEFING = 'jarvis.briefing.cache'
-const BRIEFING_TTL_MS = 4 * 60 * 60 * 1000 // 4 hours
+const BRIEFING_TTL_MS = 4 * 60 * 60 * 1000
 
 interface BriefingCache {
   text: string
@@ -30,7 +29,6 @@ function saveCache(text: string) {
 }
 
 async function gatherContext() {
-  // Tasks
   let tasksCount = 0
   let topTask: string | undefined
   try {
@@ -40,15 +38,13 @@ async function gatherContext() {
       const tasks = (d.tasks ?? []) as Array<{ title: string; completed: boolean; priority: string }>
       const open = tasks.filter((t) => !t.completed)
       tasksCount = open.length
-      const priorities = ['critical', 'high', 'normal']
-      for (const p of priorities) {
+      for (const p of ['critical', 'high', 'normal']) {
         const found = open.find((t) => t.priority === p)
         if (found) { topTask = found.title; break }
       }
     }
   } catch {}
 
-  // Next calendar event (from localStorage)
   let nextEvent: string | undefined
   try {
     const raw = localStorage.getItem('jarvis.planner.events')
@@ -57,13 +53,10 @@ async function gatherContext() {
       const upcoming = events
         .filter((e) => new Date(e.startsAt) > new Date())
         .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
-      if (upcoming[0]) {
-        nextEvent = `${upcoming[0].title} at ${format(new Date(upcoming[0].startsAt), 'h:mm a')}`
-      }
+      if (upcoming[0]) nextEvent = `${upcoming[0].title} at ${format(new Date(upcoming[0].startsAt), 'h:mm a')}`
     }
   } catch {}
 
-  // BTC from crypto watchlist
   let btcPrice: string | undefined
   let btcChange: string | undefined
   try {
@@ -79,7 +72,6 @@ async function gatherContext() {
     }
   } catch {}
 
-  // Top news headline
   let topHeadline: string | undefined
   try {
     const r = await fetch('/api/news?category=all', { cache: 'no-store' })
@@ -103,34 +95,25 @@ export function BriefingPanel() {
   const generate = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort()
     abortRef.current = new AbortController()
-
-    setLoading(true)
-    setError(false)
-    setText('')
-
+    setLoading(true); setError(false); setText('')
     try {
       const context = await gatherContext()
-
       const response = await fetch('/api/ai/briefing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(context),
         signal: abortRef.current.signal,
       })
-
       if (!response.ok || !response.body) throw new Error('Failed')
-
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let accumulated = ''
-
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         accumulated += decoder.decode(value, { stream: true })
         setText(accumulated)
       }
-
       saveCache(accumulated)
       setGeneratedAt(new Date())
     } catch (err) {
@@ -141,76 +124,59 @@ export function BriefingPanel() {
     }
   }, [])
 
-  // On mount: load cache or generate
   useEffect(() => {
     const cached = loadCache()
-    if (cached) {
-      setText(cached.text)
-      setGeneratedAt(new Date(cached.generatedAt))
-    } else {
-      generate()
-    }
-
-    // Auto-regenerate every 4 hours
-    const interval = setInterval(() => {
-      generate()
-    }, BRIEFING_TTL_MS)
-
-    return () => {
-      clearInterval(interval)
-      abortRef.current?.abort()
-    }
+    if (cached) { setText(cached.text); setGeneratedAt(new Date(cached.generatedAt)) }
+    else { generate() }
+    const interval = setInterval(() => { generate() }, BRIEFING_TTL_MS)
+    return () => { clearInterval(interval); abortRef.current?.abort() }
   }, [generate])
 
-  return (
-    <div
-      className="workspace-panel briefing-panel flex-shrink-0 briefing-panel--root"
-    >
-      <div className="workspace-panel__body briefing-panel__body">
-        {/* Left label */}
-        <div className="flex flex-shrink-0 flex-col gap-1 briefing-panel__label">
-          <div className="flex items-center gap-2">
-            <span
-              style={{ width: 7, height: 7, borderRadius: '999px', background: 'var(--success)', display: 'inline-block', flexShrink: 0 }}
-              className={loading ? 'dot-blink' : 'pulse-green'}
-            />
-            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)' }}>
-              JARVIS BRIEFING
-            </span>
-          </div>
-          {generatedAt ? (
-            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-              {format(generatedAt, 'h:mm a')}
-            </span>
-          ) : null}
-          <button
-            onClick={generate}
-            disabled={loading}
-            className="workspace-button"
-            style={{ padding: '4px 8px', marginTop: 4, fontSize: 11 }}
-            aria-label="Regenerate briefing"
-          >
-            <RefreshCw size={10} className={loading ? 'animate-spin' : ''} />
-            {loading ? 'Thinking...' : 'Regen'}
-          </button>
-        </div>
+  const now = new Date()
+  const timeStr = format(now, 'HH:mm')
+  const dateStr = format(now, 'EEEE, MMM d')
 
-        {/* Briefing text */}
-        <div className="workspace-scroll min-h-0 flex-1 overflow-y-auto" style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-soft)' }}>
-          {error ? (
-            <span style={{ color: 'var(--danger)', fontSize: 13 }}>
-              Briefing unavailable — check your Anthropic key.
-            </span>
-          ) : loading && !text ? (
-            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-              <Zap size={12} style={{ display: 'inline', marginRight: 6, color: 'var(--accent)' }} />
-              JARVIS is generating your briefing...
-            </span>
-          ) : (
-            text
-          )}
-        </div>
+  return (
+    <section className="briefing">
+      <div className="briefing-eyebrow">
+        <span className={`pulse ${loading ? 'dot-blink' : ''}`} />
+        JARVIS BRIEFING
+        <time>{generatedAt ? `Generated ${format(generatedAt, 'h:mm a')}` : timeStr} · {dateStr}</time>
       </div>
-    </div>
+
+      <div className="briefing-body">
+        {error ? (
+          <span style={{ color: 'var(--danger)', fontFamily: 'var(--font-ui)', fontSize: 14 }}>
+            Briefing unavailable — check your Anthropic API key.
+          </span>
+        ) : loading && !text ? (
+          <span style={{ color: 'var(--text-mute)', fontStyle: 'italic', fontSize: 16 }}>
+            Jarvis is generating your briefing...
+          </span>
+        ) : (
+          text
+        )}
+      </div>
+
+      <div className="briefing-actions">
+        <button className="ghost-btn" onClick={generate} disabled={loading} style={{ opacity: loading ? 0.5 : 1 }}>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12a8 8 0 0 1 14.6-4.5L21 5"/><path d="M21 5v5h-5"/>
+            <path d="M20 12a8 8 0 0 1-14.6 4.5L3 19"/><path d="M3 19v-5h5"/>
+          </svg>
+          {loading ? 'Thinking...' : 'Regenerate'}
+        </button>
+        <button className="ghost-btn">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3l1.8 4.7L18 9.5l-4.2 1.8L12 16l-1.8-4.7L6 9.5l4.2-1.8L12 3z"/>
+          </svg>
+          Ask Jarvis
+        </button>
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 11, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>
+          AI · auto-refreshes 4h
+        </span>
+      </div>
+    </section>
   )
 }

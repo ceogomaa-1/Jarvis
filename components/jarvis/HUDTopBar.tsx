@@ -1,105 +1,50 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { LogOut, Moon, ShieldCheck, Sun } from 'lucide-react'
-import { getSupabaseClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
-import { FocusTimer } from '@/components/jarvis/FocusTimer'
+import { LogOut } from 'lucide-react'
 import { DayScore } from '@/components/jarvis/DayScore'
 
 interface HUDTopBarProps {
-  userEmail?: string
   userName?: string
+  tod?: 'morning' | 'afternoon' | 'evening'
+  greeting?: string
+  onOpenCmd?: () => void
+  // kept for API compat but unused in new design
+  userEmail?: string
   securityLabel?: string
   theme?: 'light' | 'dark'
   onToggleTheme?: () => void
 }
 
-export function HUDTopBar({ userEmail, userName, securityLabel, theme = 'light', onToggleTheme }: HUDTopBarProps) {
-  const router = useRouter()
-  const [time, setTime] = useState(new Date())
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setTime(new Date()), 1000)
-    return () => window.clearInterval(timer)
-  }, [])
-
-  const handleLogout = async () => {
-    await getSupabaseClient().auth.signOut()
-    router.push('/login')
-  }
+export function HUDTopBar({ userName = 'Mohamed', tod = 'morning', greeting = 'Good morning,', onOpenCmd }: HUDTopBarProps) {
+  const firstName = userName.split(' ')[0]
 
   return (
-    <header
-      className="workspace-card"
-      style={{
-        position: 'sticky',
-        top: 2,
-        zIndex: 20,
-        margin: '2px 10px 0',
-        borderRadius: 16,
-        padding: '5px 14px',
-        background: 'var(--topbar-bg)',
-        backdropFilter: 'blur(18px)',
-        transition: 'background 0.25s ease, border-color 0.25s ease',
-      }}
-    >
-      <div className="flex items-center justify-between gap-2">
-        {/* Left: logo + name */}
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="font-display" style={{ fontSize: 22, lineHeight: 1 }}>
-            Jarvis
-          </span>
-          <span className="hidden sm:block" style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-            {userName || userEmail || 'Workspace'}
-          </span>
-        </div>
-
-        {/* Right: controls — on mobile show only time + logout */}
-        <div className="flex items-center gap-1.5">
-          {/* Theme toggle — icon only on mobile */}
-          {onToggleTheme ? (
-            <button onClick={onToggleTheme} className="workspace-button" aria-label="Toggle theme">
-              {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
-              <span className="hidden sm:inline">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-            </button>
-          ) : null}
-
-          {/* Time — always visible */}
-          <div className="workspace-badge workspace-badge--success">
-            <span>{time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
-          </div>
-
-          {/* Date — hidden on mobile */}
-          <div className="workspace-badge workspace-badge--info hidden sm:inline-flex">
-            {time.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
-          </div>
-
-          {/* Focus Timer — hidden on mobile */}
-          <div className="hidden md:block">
-            <FocusTimer />
-          </div>
-
-          {/* Day Score — hidden on mobile */}
-          <div className="hidden md:block">
-            <DayScore />
-          </div>
-
-          {/* Security label — hidden on mobile */}
-          {securityLabel ? (
-            <div className="workspace-badge workspace-badge--warm hidden sm:inline-flex">
-              <ShieldCheck size={12} />
-              {securityLabel}
-            </div>
-          ) : null}
-
-          {/* Logout — always visible */}
-          <button onClick={handleLogout} className="workspace-button" aria-label="Logout">
-            <LogOut size={12} />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        </div>
+    <div className="topbar">
+      <div className="greeting">
+        {greeting} <em>{firstName}</em>.
       </div>
-    </header>
+      <div className="spacer" />
+
+      {/* Day score */}
+      <DayScore />
+
+      {/* ⌘K command button */}
+      <button className="cmdk-btn" onClick={onOpenCmd} title="Open command palette (⌘K)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
+        </svg>
+        <span>Ask Jarvis or jump to…</span>
+        <span className="kbd">⌘K</span>
+      </button>
+
+      {/* Settings icon */}
+      <button className="icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14 3.2h-4l-.6 2.5a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.6 2.5h4l.6-2.5a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c0-.4.1-.8.1-1.2z"/>
+        </svg>
+      </button>
+    </div>
   )
 }

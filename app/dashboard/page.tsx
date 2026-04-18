@@ -1,30 +1,28 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ShieldCheck, Smartphone, QrCode, ArrowRight } from 'lucide-react'
+import { ShieldCheck, Smartphone, QrCode, ArrowRight, Home, CheckSquare, Mail, CalendarDays, Newspaper, TrendingUp, Target, Moon, LogOut, Settings, Zap, Timer } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { HUDTopBar } from '@/components/jarvis/HUDTopBar'
+import { BriefingPanel } from '@/components/jarvis/BriefingPanel'
+import { TasksPanel } from '@/components/jarvis/TasksPanel'
 import { NewsPanel } from '@/components/jarvis/NewsPanel'
 import { FinancePanel } from '@/components/jarvis/FinancePanel'
-import { TasksPanel } from '@/components/jarvis/TasksPanel'
-import { NotesPanel } from '@/components/jarvis/NotesPanel'
-import { CalendarPanel } from '@/components/jarvis/CalendarPanel'
 import { EmailPanel } from '@/components/jarvis/EmailPanel'
-import { BriefingPanel } from '@/components/jarvis/BriefingPanel'
-import { QuickCapture } from '@/components/jarvis/QuickCapture'
-import { FinanceAgentPanel } from '@/components/jarvis/FinanceAgentPanel'
 import { MyGoalPanel } from '@/components/jarvis/MyGoalPanel'
 import { SubscriptionsPanel } from '@/components/jarvis/SubscriptionsPanel'
 import { GoogleCalendarPanel } from '@/components/jarvis/GoogleCalendarPanel'
+import { HUDTopBar } from '@/components/jarvis/HUDTopBar'
+import { QuickCapture } from '@/components/jarvis/QuickCapture'
+import { DayScore } from '@/components/jarvis/DayScore'
+import { NotesPanel } from '@/components/jarvis/NotesPanel'
+import { FinanceAgentPanel } from '@/components/jarvis/FinanceAgentPanel'
 
 interface UserInfo {
   id: string
   email: string
   name?: string
 }
-
-type ThemeMode = 'light' | 'dark'
 
 interface MfaState {
   needsSetup: boolean
@@ -38,31 +36,17 @@ interface MfaState {
 
 async function persistGoogleProviderTokens(providerToken?: string | null, providerRefreshToken?: string | null) {
   if (!providerToken && !providerRefreshToken) return
-
   await fetch('/api/email-digest/connect', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      providerToken,
-      providerRefreshToken,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ providerToken, providerRefreshToken }),
   }).catch(() => null)
 }
 
 function SecurityGate({
-  state,
-  code,
-  onCodeChange,
-  onEnroll,
-  onVerify,
+  state, code, onCodeChange, onEnroll, onVerify,
 }: {
-  state: MfaState
-  code: string
-  onCodeChange: (value: string) => void
-  onEnroll: () => void
-  onVerify: () => void
+  state: MfaState; code: string; onCodeChange: (v: string) => void; onEnroll: () => void; onVerify: () => void
 }) {
   const title = state.needsSetup ? 'Add Microsoft Authenticator' : 'Verify Microsoft Authenticator'
   const description = state.needsSetup
@@ -75,23 +59,17 @@ function SecurityGate({
         <div className="workspace-panel__body">
           <div className="flex flex-col gap-5">
             <div className="workspace-badge workspace-badge--warm" style={{ width: 'fit-content' }}>
-              <ShieldCheck size={14} />
-              Security step
+              <ShieldCheck size={14} /> Security step
             </div>
-
             <div>
-              <h1 className="font-display" style={{ fontSize: 44, lineHeight: 0.95 }}>
-                {title}
-              </h1>
-              <p style={{ marginTop: 12, color: 'var(--text-soft)', lineHeight: 1.7 }}>{description}</p>
+              <h1 className="font-display" style={{ fontSize: 36, lineHeight: 1 }}>{title}</h1>
+              <p style={{ marginTop: 12, color: 'var(--text-dim)', lineHeight: 1.7 }}>{description}</p>
             </div>
-
             {state.needsSetup ? (
               <>
                 {!state.qrCode ? (
                   <button onClick={onEnroll} className="workspace-button workspace-button--primary">
-                    <QrCode size={16} />
-                    Generate QR code
+                    <QrCode size={16} /> Generate QR code
                   </button>
                 ) : (
                   <div className="grid gap-5 md:grid-cols-[220px_1fr]">
@@ -100,17 +78,15 @@ function SecurityGate({
                       <img src={state.qrCode} alt="Authenticator QR code" style={{ width: '100%', maxWidth: 180 }} />
                     </div>
                     <div className="workspace-card p-4">
-                      <div style={{ fontWeight: 800, marginBottom: 8 }}>Use the Microsoft Authenticator app</div>
-                      <div style={{ color: 'var(--text-soft)', fontSize: 14, lineHeight: 1.7 }}>
-                        1. Open Microsoft Authenticator on your phone.
-                        <br />
-                        2. Tap add account and scan the QR code.
-                        <br />
+                      <div style={{ fontWeight: 700, marginBottom: 8 }}>Use the Microsoft Authenticator app</div>
+                      <div style={{ color: 'var(--text-dim)', fontSize: 14, lineHeight: 1.7 }}>
+                        1. Open Microsoft Authenticator on your phone.<br />
+                        2. Tap add account and scan the QR code.<br />
                         3. Enter the current 6-digit code below.
                       </div>
                       {state.secret ? (
-                        <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-soft)' }}>
-                          Backup secret: <span style={{ fontWeight: 800, color: 'var(--text)' }}>{state.secret}</span>
+                        <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-dim)' }}>
+                          Backup secret: <span style={{ fontWeight: 700, color: 'var(--text)' }}>{state.secret}</span>
                         </div>
                       ) : null}
                     </div>
@@ -121,37 +97,64 @@ function SecurityGate({
               <div className="workspace-card flex items-center gap-3 p-4">
                 <Smartphone size={18} color="var(--accent)" />
                 <div>
-                  <div style={{ fontWeight: 800 }}>Open Microsoft Authenticator</div>
-                  <div style={{ color: 'var(--text-soft)', fontSize: 14 }}>
-                    Use the code for your Jarvis account to unlock the dashboard.
-                  </div>
+                  <div style={{ fontWeight: 700 }}>Open Microsoft Authenticator</div>
+                  <div style={{ color: 'var(--text-dim)', fontSize: 14 }}>Use the code for your Jarvis account to unlock the dashboard.</div>
                 </div>
               </div>
             )}
-
             {(state.qrCode || state.needsVerification) ? (
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={code}
-                  onChange={(event) => onCodeChange(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(e) => onCodeChange(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="workspace-input"
                   placeholder="6-digit code"
                   inputMode="numeric"
                 />
                 <button onClick={onVerify} className="workspace-button workspace-button--primary" disabled={code.length !== 6 || state.loading}>
-                  Continue
-                  <ArrowRight size={14} />
+                  Continue <ArrowRight size={14} />
                 </button>
               </div>
             ) : null}
-
             {state.error ? (
-              <div className="workspace-badge workspace-badge--danger" style={{ width: 'fit-content' }}>
-                {state.error}
-              </div>
+              <div className="workspace-badge workspace-badge--danger" style={{ width: 'fit-content' }}>{state.error}</div>
             ) : null}
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+type WorkspaceTab = 'tasks' | 'signals' | 'finance' | 'notes' | 'financeai'
+type NavSection = 'today' | 'tasks' | 'inbox' | 'signals' | 'finance' | 'goals' | 'notes'
+
+const WORKSPACE_TABS: { id: WorkspaceTab; label: string }[] = [
+  { id: 'tasks', label: 'Tasks' },
+  { id: 'signals', label: 'Signals' },
+  { id: 'finance', label: 'Finance' },
+  { id: 'notes', label: 'Notes' },
+  { id: 'financeai', label: 'Finance AI' },
+]
+
+function WorkspacePanel({ defaultTab }: { defaultTab?: WorkspaceTab }) {
+  const [tab, setTab] = useState<WorkspaceTab>(defaultTab ?? 'tasks')
+  return (
+    <div className="workspace">
+      <div className="workspace-tabs">
+        {WORKSPACE_TABS.map((t) => (
+          <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+        <div className="spacer" />
+      </div>
+      <div className="workspace-body workspace-scroll">
+        {tab === 'tasks' && <TasksPanel />}
+        {tab === 'signals' && <NewsPanel />}
+        {tab === 'finance' && <FinancePanel />}
+        {tab === 'notes' && <NotesPanel />}
+        {tab === 'financeai' && <FinanceAgentPanel />}
       </div>
     </div>
   )
@@ -162,15 +165,11 @@ export default function DashboardPage() {
   const [user, setUser] = useState<UserInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [mfaCode, setMfaCode] = useState('')
-  const [theme, setTheme] = useState<ThemeMode>('light')
+  const [navActive, setNavActive] = useState<NavSection>('today')
+  const [cmdOpen, setCmdOpen] = useState(false)
   const [mfaState, setMfaState] = useState<MfaState>({
-    needsSetup: false,
-    needsVerification: false,
-    qrCode: null,
-    factorId: null,
-    secret: null,
-    error: null,
-    loading: false,
+    needsSetup: false, needsVerification: false, qrCode: null,
+    factorId: null, secret: null, error: null, loading: false,
   })
 
   const securityLabel = useMemo(() => {
@@ -180,235 +179,223 @@ export default function DashboardPage() {
   }, [mfaState.needsSetup, mfaState.needsVerification])
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem('jarvis-theme')
-    const nextTheme: ThemeMode = savedTheme === 'dark' ? 'dark' : 'light'
-    setTheme(nextTheme)
-    document.documentElement.dataset.theme = nextTheme
-  }, [])
-
-  useEffect(() => {
     const supabase = getSupabaseClient()
-
     const syncSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session) {
-        router.push('/login')
-        return
-      }
-
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { router.push('/login'); return }
       const currentUser = session.user
       await persistGoogleProviderTokens(session.provider_token, session.provider_refresh_token)
-
-      setUser({
-        id: currentUser.id,
-        email: currentUser.email ?? '',
-        name: currentUser.user_metadata?.full_name ?? currentUser.user_metadata?.name ?? '',
-      })
-
+      setUser({ id: currentUser.id, email: currentUser.email ?? '', name: currentUser.user_metadata?.full_name ?? currentUser.user_metadata?.name ?? '' })
       const [{ data: aalData }, { data: factorsData }] = await Promise.all([
         supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
         supabase.auth.mfa.listFactors(),
       ])
-
       const hasTotpFactor = (factorsData?.totp ?? []).length > 0
       const mustVerify = aalData?.nextLevel === 'aal2' && aalData?.currentLevel !== 'aal2'
-
-      setMfaState((current) => ({
-        ...current,
-        needsSetup: !hasTotpFactor,
-        needsVerification: mustVerify,
-        error: null,
-      }))
-
+      setMfaState((c) => ({ ...c, needsSetup: !hasTotpFactor, needsVerification: mustVerify, error: null }))
       setLoading(false)
     }
-
     syncSession()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        router.push('/login')
-        return
-      }
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) { router.push('/login'); return }
       persistGoogleProviderTokens(session.provider_token, session.provider_refresh_token)
     })
-
     return () => subscription.unsubscribe()
   }, [router])
 
+  // ⌘K shortcut
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    window.localStorage.setItem('jarvis-theme', theme)
-  }, [theme])
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault(); setCmdOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const handleLogout = async () => {
+    await getSupabaseClient().auth.signOut()
+    router.push('/login')
+  }
 
   const enrollMfa = async () => {
-    setMfaState((current) => ({ ...current, loading: true, error: null }))
+    setMfaState((c) => ({ ...c, loading: true, error: null }))
     const supabase = getSupabaseClient()
-    const { data, error } = await supabase.auth.mfa.enroll({
-      factorType: 'totp',
-      friendlyName: 'Microsoft Authenticator',
-    })
-
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Microsoft Authenticator' })
     if (error || !data?.totp) {
-      setMfaState((current) => ({
-        ...current,
-        loading: false,
-        error: error?.message ?? 'Could not generate the authenticator QR code.',
-      }))
+      setMfaState((c) => ({ ...c, loading: false, error: error?.message ?? 'Could not generate QR code.' }))
       return
     }
-
-    setMfaState((current) => ({
-      ...current,
-      loading: false,
-      qrCode: data.totp.qr_code,
-      factorId: data.id,
-      secret: data.totp.secret,
-      error: null,
-    }))
+    setMfaState((c) => ({ ...c, loading: false, qrCode: data.totp.qr_code, factorId: data.id, secret: data.totp.secret, error: null }))
   }
 
   const verifyMfa = async () => {
     const supabase = getSupabaseClient()
     const factorId = mfaState.factorId ?? (await supabase.auth.mfa.listFactors()).data?.totp?.[0]?.id
-
-    if (!factorId) {
-      setMfaState((current) => ({ ...current, error: 'No authenticator factor found yet.' }))
-      return
-    }
-
-    setMfaState((current) => ({ ...current, loading: true, error: null }))
+    if (!factorId) { setMfaState((c) => ({ ...c, error: 'No authenticator factor found yet.' })); return }
+    setMfaState((c) => ({ ...c, loading: true, error: null }))
     const { data, error: challengeError } = await supabase.auth.mfa.challenge({ factorId })
-
     if (challengeError || !data?.id) {
-      setMfaState((current) => ({
-        ...current,
-        loading: false,
-        error: challengeError?.message ?? 'Could not create an MFA challenge.',
-      }))
+      setMfaState((c) => ({ ...c, loading: false, error: challengeError?.message ?? 'Could not create MFA challenge.' }))
       return
     }
-
-    const { error: verifyError } = await supabase.auth.mfa.verify({
-      factorId,
-      challengeId: data.id,
-      code: mfaCode,
-    })
-
-    if (verifyError) {
-      setMfaState((current) => ({
-        ...current,
-        loading: false,
-        error: verifyError.message,
-      }))
-      return
-    }
-
+    const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId: data.id, code: mfaCode })
+    if (verifyError) { setMfaState((c) => ({ ...c, loading: false, error: verifyError.message })); return }
     setMfaCode('')
-    setMfaState({
-      needsSetup: false,
-      needsVerification: false,
-      qrCode: null,
-      factorId,
-      secret: null,
-      error: null,
-      loading: false,
-    })
+    setMfaState({ needsSetup: false, needsVerification: false, qrCode: null, factorId, secret: null, error: null, loading: false })
   }
+
+  const hour = new Date().getHours()
+  const tod = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'
+  const greetingMap = { morning: 'Good morning,', afternoon: 'Good afternoon,', evening: 'Winding down,' }
+
+  const navItems: { id: NavSection; label: string; icon: React.ReactNode }[] = [
+    { id: 'today', label: 'Today', icon: <Home size={15} /> },
+    { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={15} /> },
+    { id: 'inbox', label: 'Inbox', icon: <Mail size={15} /> },
+    { id: 'signals', label: 'Signals', icon: <Newspaper size={15} /> },
+    { id: 'finance', label: 'Finance', icon: <TrendingUp size={15} /> },
+    { id: 'goals', label: 'Goals', icon: <Target size={15} /> },
+    { id: 'notes', label: 'Notes', icon: <CalendarDays size={15} /> },
+  ]
+
+  const userName = user?.name || user?.email?.split('@')[0] || 'Mohamed'
+  const userInitial = userName.charAt(0).toUpperCase()
 
   if (loading) {
     return (
       <div className="workspace-shell flex min-h-screen items-center justify-center">
-        <div className="workspace-badge workspace-badge--info">Loading your workspace...</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+          <span className="dot-blink" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
+          Loading your workspace...
+        </div>
       </div>
     )
   }
 
   if (mfaState.needsSetup || mfaState.needsVerification) {
     return (
-      <SecurityGate
-        state={mfaState}
-        code={mfaCode}
-        onCodeChange={setMfaCode}
-        onEnroll={enrollMfa}
-        onVerify={verifyMfa}
-      />
+      <SecurityGate state={mfaState} code={mfaCode} onCodeChange={setMfaCode} onEnroll={enrollMfa} onVerify={verifyMfa} />
     )
   }
 
   return (
-    <div className="workspace-shell lg:h-screen lg:overflow-hidden">
-      <HUDTopBar
-        userEmail={user?.email}
-        userName={user?.name}
-        securityLabel={securityLabel}
-        theme={theme}
-        onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
-      />
-
-      {/* Main scrolls vertically; the 2-row panel grid is fixed-height within it */}
-      <main
-        className="workspace-scroll px-2 pt-2 md:px-3 xl:px-4"
-        style={{ height: 'calc(100vh - 44px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 32 }}
-      >
-        {/* Row 0: Full-width AI Briefing — fixed ~110px */}
-        <BriefingPanel />
-
-        {/* Rows 1+2: the existing 6-panel grid — fills remaining viewport */}
-        <div
-          className="grid min-h-0 grid-cols-1 gap-3 xl:grid-cols-12 xl:grid-rows-[minmax(310px,44fr)_minmax(400px,56fr)] 2xl:gap-4"
-          style={{ flex: '1 0 0', minHeight: 740 }}
-        >
-          <div className="min-h-0 xl:col-span-5">
-            <NewsPanel />
-          </div>
-          <div className="min-h-0 xl:col-span-3">
-            <FinancePanel />
-          </div>
-          <div className="min-h-0 xl:col-span-4">
-            <EmailPanel />
+    <>
+      <div className="ambient" />
+      <div className="shell">
+        {/* ── Sidebar ──────────────────────────────────────── */}
+        <aside className="sidebar">
+          <div className="brand">
+            <div className="brand-mark" />
+            <div>
+              <div className="brand-word">Jarvis</div>
+              <div className="brand-sub">v4 · Personal OS</div>
+            </div>
           </div>
 
-          <div className="min-h-0 xl:col-span-4">
-            <TasksPanel />
+          <div>
+            <div className="nav-section-label">Workspace</div>
+            <nav className="nav-list">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  className={`nav-item ${navActive === item.id ? 'active' : ''}`}
+                  onClick={() => setNavActive(item.id)}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
-          <div className="min-h-0 xl:col-span-4">
-            <NotesPanel />
+
+          <div>
+            <div className="nav-section-label">Ambient</div>
+            <nav className="nav-list">
+              <button className="nav-item"><Zap size={15} /> <span>Quick capture</span></button>
+              <button className="nav-item"><Timer size={15} /> <span>Focus mode</span></button>
+              <button className="nav-item"><Moon size={15} /> <span>Wind-down</span></button>
+            </nav>
           </div>
-          <div className="min-h-0 xl:col-span-4">
-            <CalendarPanel />
+
+          <div className="sidebar-footer">
+            <div className="user-chip">
+              <div className="avatar">{userInitial}</div>
+              <div className="user-meta">
+                <span className="user-name">{userName}</span>
+                <span className="user-role">{securityLabel}</span>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="nav-item"
+              style={{ color: 'var(--text-faint)', fontSize: 12, padding: '5px 4px' }}
+            >
+              <LogOut size={13} />
+              <span>Logout</span>
+            </button>
           </div>
+        </aside>
+
+        {/* ── Canvas ───────────────────────────────────────── */}
+        <div className="canvas">
+          {/* Main column */}
+          <main className="main-col workspace-scroll">
+            {/* Top bar */}
+            <HUDTopBar
+              userName={userName}
+              tod={tod}
+              greeting={greetingMap[tod]}
+              onOpenCmd={() => setCmdOpen(true)}
+            />
+
+            {/* Briefing hero */}
+            <BriefingPanel />
+
+            {/* Workspace tabs */}
+            <div className="section-head" style={{ marginTop: 4 }}>
+              <h2>Workspace</h2>
+              <span className="hint">tasks · signals · finance · notes</span>
+            </div>
+            <WorkspacePanel />
+          </main>
+
+          {/* Right rail */}
+          <aside className="rail workspace-scroll">
+            <div className="rail-section">
+              <div className="rail-head">
+                <span className="rail-title">Today's Schedule</span>
+              </div>
+              <GoogleCalendarPanel />
+            </div>
+
+            <div className="rail-section">
+              <div className="rail-head">
+                <span className="rail-title">Goal</span>
+              </div>
+              <MyGoalPanel />
+            </div>
+
+            <div className="rail-section">
+              <div className="rail-head">
+                <span className="rail-title">Inbox</span>
+              </div>
+              <EmailPanel />
+            </div>
+
+            <div className="rail-section">
+              <div className="rail-head">
+                <span className="rail-title">Subscriptions</span>
+              </div>
+              <SubscriptionsPanel />
+            </div>
+          </aside>
         </div>
+      </div>
 
-        {/* Row 3: Full-width My Goal Panel */}
-        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-          <MyGoalPanel />
-        </div>
-
-        {/* Row 4: Full-width Subscriptions Panel */}
-        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-          <SubscriptionsPanel />
-        </div>
-
-        {/* Row 5: Full-width Finance Agent Panel */}
-        <div style={{ minHeight: 460, maxHeight: 520, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-          <FinanceAgentPanel />
-        </div>
-
-        {/* Row 6: Full-width Google Calendar Panel */}
-        <div style={{ minHeight: 420, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-          <GoogleCalendarPanel />
-        </div>
-      </main>
-
-      {/* Global Quick Capture FAB */}
-      <QuickCapture />
-    </div>
+      {/* FAB — opens quick capture */}
+      <QuickCapture cmdOpen={cmdOpen} onCmdClose={() => setCmdOpen(false)} />
+    </>
   )
 }

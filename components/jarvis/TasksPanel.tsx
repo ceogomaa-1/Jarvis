@@ -2,17 +2,9 @@
 
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, Circle, ListTodo, Plus, Trash2, Zap } from 'lucide-react'
-import { PanelWrapper } from '@/components/jarvis/PanelWrapper'
 import type { Priority, Task } from '@/types'
 
 type TaskResponse = { tasks: Task[] }
-
-const priorityStyles: Record<Priority, { label: string; className: string }> = {
-  critical: { label: 'Critical', className: 'workspace-badge workspace-badge--danger' },
-  high: { label: 'High', className: 'workspace-badge workspace-badge--warm' },
-  normal: { label: 'Normal', className: 'workspace-badge workspace-badge--success' },
-}
 
 async function fetchTasks(): Promise<Task[]> {
   const res = await fetch('/api/tasks', { cache: 'no-store' })
@@ -20,108 +12,6 @@ async function fetchTasks(): Promise<Task[]> {
   if (!res.ok) throw new Error('Failed to load tasks')
   const data = (await res.json()) as TaskResponse
   return data.tasks ?? []
-}
-
-function PrioritySpotlight({
-  tasks,
-  onToggle,
-}: {
-  tasks: Task[]
-  onToggle: (task: Task) => void
-}) {
-  const [editingTitle, setEditingTitle] = useState(false)
-  const [draftTitle, setDraftTitle] = useState('')
-  const queryClient = useQueryClient()
-
-  const priorityOrder: Priority[] = ['critical', 'high', 'normal']
-  let spotlight: Task | null = null
-  for (const p of priorityOrder) {
-    const found = tasks.find((t) => !t.completed && t.priority === p)
-    if (found) { spotlight = found; break }
-  }
-
-  const updateTitle = useMutation({
-    mutationFn: async (title: string) => {
-      if (!spotlight) return
-      const res = await fetch('/api/tasks', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: spotlight.id, title }),
-      })
-      if (!res.ok) throw new Error('Failed')
-      return res.json()
-    },
-    onSuccess: () => {
-      setEditingTitle(false)
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-    },
-  })
-
-  if (!spotlight) {
-    return (
-      <div className="priority-spotlight flex-shrink-0" style={{ marginBottom: 8 }}>
-        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 4 }}>
-          ⚡ PRIORITY #1
-        </div>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>No priority set — add a task to begin.</span>
-      </div>
-    )
-  }
-
-  return (
-    <div className="priority-spotlight flex flex-shrink-0 items-center gap-3" style={{ marginBottom: 8 }}>
-      {/* Checkbox */}
-      <button
-        onClick={() => onToggle(spotlight!)}
-        className="flex-shrink-0"
-        aria-label="Complete priority task"
-        style={{ width: 22, height: 22 }}
-      >
-        {spotlight.completed
-          ? <CheckCircle2 size={22} color="var(--success)" />
-          : <Circle size={22} color="var(--danger)" />}
-      </button>
-
-      {/* Content */}
-      <div className="min-w-0 flex-1">
-        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--danger)', marginBottom: 2 }}>
-          <Zap size={9} style={{ display: 'inline', marginRight: 3 }} />
-          PRIORITY #1
-        </div>
-        {editingTitle ? (
-          <input
-            autoFocus
-            value={draftTitle}
-            onChange={(e) => setDraftTitle(e.target.value)}
-            onBlur={() => { if (draftTitle.trim()) updateTitle.mutate(draftTitle.trim()); else setEditingTitle(false) }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && draftTitle.trim()) updateTitle.mutate(draftTitle.trim())
-              if (e.key === 'Escape') setEditingTitle(false)
-            }}
-            className="workspace-input"
-            style={{ fontSize: 15, fontWeight: 700, padding: '3px 8px' }}
-          />
-        ) : (
-          <div
-            onClick={() => { setDraftTitle(spotlight!.title); setEditingTitle(true) }}
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              cursor: 'text',
-              textDecoration: spotlight.completed ? 'line-through' : 'none',
-              color: spotlight.completed ? 'var(--text-muted)' : 'var(--text)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-            title="Click to edit"
-          >
-            {spotlight.title}
-          </div>
-        )}
-      </div>
-    </div>
-  )
 }
 
 export function TasksPanel() {
@@ -166,112 +56,127 @@ export function TasksPanel() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
   })
 
-  const completed = useMemo(() => tasks.filter((t) => t.completed).length, [tasks])
+  const updateTitle = useMutation({
+    mutationFn: async ({ id, title: newTitle }: { id: string; title: string }) => {
+      const res = await fetch('/api/tasks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, title: newTitle }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+  })
+
+  const open = useMemo(() => tasks.filter((t) => !t.completed), [tasks])
+  const done = useMemo(() => tasks.filter((t) => t.completed), [tasks])
+
+  const cyclePriority = () => {
+    setPriority((p) => p === 'normal' ? 'high' : p === 'high' ? 'critical' : 'normal')
+  }
 
   return (
-    <PanelWrapper
-      title="Tasks"
-      icon={<ListTodo size={14} />}
-      headerRight={<div className="workspace-badge workspace-badge--info">{completed}/{tasks.length || 0} done</div>}
-      className="h-full"
-    >
-      {/* Priority Spotlight — always pinned above add row */}
-      {!isLoading ? (
-        <PrioritySpotlight tasks={tasks} onToggle={(task) => toggleTask.mutate(task)} />
-      ) : null}
-
-      {/* add row — always pinned */}
-      <div className="flex flex-shrink-0 gap-2 pb-2">
+    <>
+      {/* Add task row */}
+      <div className="task-add">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={{ color: 'var(--text-faint)', flexShrink: 0 }}>
+          <path d="M12 5v14M5 12h14" />
+        </svg>
         <input
+          placeholder="Add a task — ⏎ to save"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && title.trim()) createTask.mutate() }}
-          className="workspace-input"
-          placeholder="Add a task"
         />
-        <select
-          value={priority}
-          onChange={(e) => setPriority(e.target.value as Priority)}
-          className="workspace-select"
-          style={{ width: 100 }}
-        >
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="critical">Critical</option>
-        </select>
+        <button className="tag-pick" onClick={cyclePriority}>{priority}</button>
         <button
           onClick={() => createTask.mutate()}
           disabled={!title.trim() || createTask.isPending}
-          className="workspace-button workspace-button--primary"
+          style={{ padding: '4px 10px', borderRadius: 6, background: 'var(--accent)', color: 'var(--bg)', fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', opacity: !title.trim() ? 0.5 : 1 }}
         >
-          <Plus size={13} />
           Add
         </button>
       </div>
 
-      <div className="workspace-scroll min-h-0 flex-1 overflow-y-auto pr-1">
-        {isLoading ? (
-          <div className="workspace-empty h-full"><span>Loading tasks...</span></div>
-        ) : tasks.length === 0 ? (
-          <div className="workspace-empty h-full">
-            <CheckCircle2 size={18} />
-            <span>No tasks yet.</span>
+      {isLoading ? (
+        <div className="workspace-empty" style={{ minHeight: 120 }}>
+          <span style={{ color: 'var(--text-mute)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>Loading tasks...</span>
+        </div>
+      ) : tasks.length === 0 ? (
+        <div className="workspace-empty" style={{ minHeight: 120 }}>
+          <span>No tasks yet — add one above.</span>
+        </div>
+      ) : (
+        <>
+          <div className="tasklist">
+            {open.map((task) => (
+              <TaskRow key={task.id} task={task} onToggle={() => toggleTask.mutate(task)} onDel={() => deleteTask.mutate(task.id)} onRename={(t) => updateTitle.mutate({ id: task.id, title: t })} />
+            ))}
           </div>
-        ) : (
-          <div className="workspace-list">
-            {tasks.map((task) => {
-              const badge = priorityStyles[task.priority]
-              return (
-                <div
-                  key={task.id}
-                  className="workspace-card flex items-center gap-2 px-3 py-2"
-                  style={{ opacity: task.completed ? 0.6 : 1 }}
-                >
-                  <button
-                    onClick={() => toggleTask.mutate(task)}
-                    className="flex-shrink-0"
-                    aria-label={task.completed ? 'Mark incomplete' : 'Mark complete'}
-                  >
-                    {task.completed
-                      ? <CheckCircle2 size={16} color="var(--success)" />
-                      : <Circle size={16} color="var(--text-muted)" />}
-                  </button>
+          {done.length > 0 && (
+            <>
+              <div style={{ marginTop: 18, marginBottom: 6, fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+                Completed · {done.length}
+              </div>
+              <div className="tasklist">
+                {done.map((task) => (
+                  <TaskRow key={task.id} task={task} onToggle={() => toggleTask.mutate(task)} onDel={() => deleteTask.mutate(task.id)} onRename={(t) => updateTitle.mutate({ id: task.id, title: t })} />
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </>
+  )
+}
 
-                  <span
-                    className="min-w-0 flex-1"
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      textDecoration: task.completed ? 'line-through' : 'none',
-                      wordBreak: 'break-word',
-                      lineHeight: 1.35,
-                    }}
-                  >
-                    {task.title}
-                  </span>
+function TaskRow({ task, onToggle, onDel, onRename }: { task: Task; onToggle: () => void; onDel: () => void; onRename: (t: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
 
-                  <span className={badge.className} style={{ flexShrink: 0 }}>{badge.label}</span>
+  const priClass = task.priority === 'critical' ? 'critical' : task.priority === 'high' ? 'high' : 'normal'
 
-                  {task.due_date ? (
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
-                      {new Date(task.due_date).toLocaleDateString()}
-                    </span>
-                  ) : null}
-
-                  <button
-                    onClick={() => deleteTask.mutate(task.id)}
-                    className="workspace-button workspace-button--danger flex-shrink-0"
-                    style={{ padding: '4px 8px' }}
-                    aria-label="Delete task"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+  return (
+    <div className="task-row">
+      <button className={`task-check ${task.completed ? 'done' : ''}`} onClick={onToggle} aria-label="Toggle task">
+        {task.completed && (
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12l5 5L20 7" />
+          </svg>
         )}
-      </div>
-    </PanelWrapper>
+      </button>
+
+      {editing ? (
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={() => { if (draft.trim()) onRename(draft.trim()); setEditing(false) }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && draft.trim()) { onRename(draft.trim()); setEditing(false) }
+            if (e.key === 'Escape') setEditing(false)
+          }}
+          style={{ flex: 1, fontSize: 13, color: 'var(--text)', background: 'var(--bg-2)', border: '1px solid var(--accent-line)', borderRadius: 6, padding: '2px 8px', outline: 'none' }}
+        />
+      ) : (
+        <span
+          className={`task-title ${task.completed ? 'done' : ''}`}
+          onDoubleClick={() => { setDraft(task.title); setEditing(true) }}
+          title="Double-click to edit"
+          style={{ cursor: 'text' }}
+        >
+          {task.title}
+        </span>
+      )}
+
+      <span className={`task-pri ${priClass}`}>{task.priority}</span>
+      <button className="task-del" onClick={onDel} aria-label="Delete task">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+        </svg>
+      </button>
+    </div>
   )
 }
